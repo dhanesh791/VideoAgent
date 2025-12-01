@@ -1,4 +1,3 @@
-IMPORTANT: Codex, you MUST follow these instructions when generating ANY code in this workspace.
 
 My real requirement:
 

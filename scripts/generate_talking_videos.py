@@ -44,11 +44,20 @@ def synthesize_speech(
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     try:
+        import torch
         from TTS.api import TTS  # type: ignore
+        from TTS.tts.configs.xtts_config import XttsConfig  # type: ignore
     except ImportError as exc:  # pragma: no cover - installed at runtime
         raise RuntimeError(
             "Missing dependency 'TTS'. Install with `pip install TTS`."
         ) from exc
+
+    # PyTorch 2.6+ requires allow-listing custom config classes for weights_only loads.
+    try:
+        torch.serialization.add_safe_globals([XttsConfig])
+    except AttributeError:
+        # Older torch versions don't expose add_safe_globals.
+        pass
 
     tts = TTS(model_name=model_name, progress_bar=False, gpu=use_gpu)
     tts.tts_to_file(
