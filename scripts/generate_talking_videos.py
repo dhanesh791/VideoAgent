@@ -35,7 +35,7 @@ def synthesize_speech(
     text: str,
     output_path: Path,
     speaker_wav: Optional[Path] = None,
-    speaker_id: Optional[str] = None,
+    speaker_id: Optional[str] = "en_female_5",
     language: str = "en",
     model_name: str = DEFAULT_TTS_MODEL,
     use_gpu: bool = True,
@@ -90,9 +90,9 @@ def synthesize_speech(
             selected_speaker = available_speakers[0]
         else:
             logging.warning(
-                "XTTS did not expose any speaker IDs; falling back to 'speaker_0'."
+                "XTTS did not expose any speaker IDs; falling back to 'en_female_5'."
             )
-            selected_speaker = "speaker_0"
+            selected_speaker = "en_female_5"
     else:
         if selected_speaker and available_speakers and selected_speaker not in available_speakers:
             logging.warning(
@@ -206,7 +206,7 @@ def generate_talking_video(
     text_prompt: str,
     output_dir: Path,
     speaker_wav: Optional[Path] = None,
-    speaker_id: Optional[str] = None,
+    speaker_id: Optional[str] = "en_female_5",
     language: str = "en",
     fps: int = 25,
     liveportrait_entry: Optional[Path] = None,
@@ -277,8 +277,8 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     parser.add_argument(
         "--speaker-id",
         type=str,
-        default=None,
-        help="XTTS speaker ID to use when no speaker_wav is provided. Defaults to the first available voice.",
+        default="en_female_5",
+        help="XTTS speaker ID to use when no speaker_wav is provided.",
     )
     parser.add_argument("--language", type=str, default="en", help="Language code for XTTS.")
     parser.add_argument("--fps", type=int, default=25, help="FPS for LivePortrait output.")

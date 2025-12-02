@@ -87,7 +87,7 @@ def handler(event: Dict) -> Dict:
         text_prompt=text_prompt,
         output_dir=output_dir,
         speaker_wav=speaker_wav,
-        speaker_id=payload.get("speaker_id"),
+        speaker_id=payload.get("speaker_id", "en_female_5"),
         language=payload.get("language", "en"),
         fps=int(payload.get("fps", 25)),
         liveportrait_entry=Path(payload["liveportrait_entry"]) if payload.get("liveportrait_entry") else None,

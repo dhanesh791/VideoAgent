@@ -101,7 +101,7 @@ def generate_wan_talking_video(
     output_dir: Path,
     wan_entry: Path,
     speaker_wav: Optional[Path] = None,
-    speaker_id: Optional[str] = None,
+    speaker_id: Optional[str] = "en_female_5",
     language: str = "en",
     fps: int = 25,
     use_gpu: bool = True,
@@ -191,8 +191,8 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     parser.add_argument(
         "--speaker-id",
         type=str,
-        default=None,
-        help="XTTS speaker ID to use when no speaker_wav is provided. Defaults to the first available voice.",
+        default="en_female_5",
+        help="XTTS speaker ID to use when no speaker_wav is provided.",
     )
     parser.add_argument("--language", type=str, default="en", help="Language code for XTTS.")
     parser.add_argument("--fps", type=int, default=25, help="FPS for Wan output.")
