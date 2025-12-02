@@ -35,6 +35,7 @@ def synthesize_speech(
     text: str,
     output_path: Path,
     speaker_wav: Optional[Path] = None,
+    speaker_id: str = "female-en-5",
     language: str = "en",
     model_name: str = DEFAULT_TTS_MODEL,
     use_gpu: bool = True,
@@ -65,6 +66,7 @@ def synthesize_speech(
     tts.tts_to_file(
         text=text,
         file_path=str(output_path),
+        speaker=speaker_id,
         speaker_wav=str(speaker_wav) if speaker_wav else None,
         language=language,
     )
@@ -166,6 +168,7 @@ def generate_talking_video(
     text_prompt: str,
     output_dir: Path,
     speaker_wav: Optional[Path] = None,
+    speaker_id: str = "female-en-5",
     language: str = "en",
     fps: int = 25,
     liveportrait_entry: Optional[Path] = None,
@@ -186,6 +189,7 @@ def generate_talking_video(
         text=text_prompt,
         output_path=audio_path,
         speaker_wav=speaker_wav,
+        speaker_id=speaker_id,
         language=language,
         use_gpu=use_gpu,
     )
@@ -231,6 +235,12 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
         type=Path,
         default=None,
         help="Optional reference audio for voice cloning (XTTS).",
+    )
+    parser.add_argument(
+        "--speaker-id",
+        type=str,
+        default="female-en-5",
+        help="XTTS speaker ID to use when no speaker_wav is provided.",
     )
     parser.add_argument("--language", type=str, default="en", help="Language code for XTTS.")
     parser.add_argument("--fps", type=int, default=25, help="FPS for LivePortrait output.")
@@ -291,6 +301,7 @@ def cli_main(argv: Optional[List[str]] = None) -> int:
         text_prompt=text_prompt,
         output_dir=args.output_dir,
         speaker_wav=args.speaker_wav,
+        speaker_id=args.speaker_id,
         language=args.language,
         fps=args.fps,
         liveportrait_entry=args.liveportrait_entry,
