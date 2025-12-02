@@ -70,9 +70,13 @@ def synthesize_speech(
     if raw_speakers:
         available_speakers = list(raw_speakers)
     if not available_speakers:
-        speaker_manager = getattr(getattr(tts, "synthesizer", None), "speaker_manager", None)
+        synthesizer = getattr(tts, "synthesizer", None)
+        speaker_manager = getattr(synthesizer, "speaker_manager", None)
         if speaker_manager and getattr(speaker_manager, "speakers", None):
-            available_speakers = list(speaker_manager.speakers.keys())
+            if isinstance(speaker_manager.speakers, dict):
+                available_speakers = list(speaker_manager.speakers.keys())
+            else:
+                available_speakers = list(speaker_manager.speakers)
     if speaker_wav is None:
         if selected_speaker:
             if available_speakers and selected_speaker not in available_speakers:
@@ -85,9 +89,8 @@ def synthesize_speech(
         elif available_speakers:
             selected_speaker = available_speakers[0]
         else:
-            raise ValueError(
-                "XTTS model requires a speaker ID but none were detected. "
-                "Provide --speaker-id or --speaker-wav."
+            logging.warning(
+                "XTTS did not expose any speaker IDs; relying on TTS defaults."
             )
     else:
         if selected_speaker and available_speakers and selected_speaker not in available_speakers:
