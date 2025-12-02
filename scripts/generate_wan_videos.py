@@ -101,6 +101,7 @@ def generate_wan_talking_video(
     output_dir: Path,
     wan_entry: Path,
     speaker_wav: Optional[Path] = None,
+    speaker_id: Optional[str] = None,
     language: str = "en",
     fps: int = 25,
     use_gpu: bool = True,
@@ -129,6 +130,7 @@ def generate_wan_talking_video(
         text=text_prompt,
         output_path=audio_path,
         speaker_wav=speaker_wav,
+        speaker_id=speaker_id,
         language=language,
         use_gpu=use_gpu,
     )
@@ -186,6 +188,12 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
         default=None,
         help="Optional reference audio for voice cloning (XTTS).",
     )
+    parser.add_argument(
+        "--speaker-id",
+        type=str,
+        default=None,
+        help="XTTS speaker ID to use when no speaker_wav is provided. Defaults to the first available voice.",
+    )
     parser.add_argument("--language", type=str, default="en", help="Language code for XTTS.")
     parser.add_argument("--fps", type=int, default=25, help="FPS for Wan output.")
     parser.add_argument(
@@ -240,6 +248,7 @@ def cli_main(argv: Optional[List[str]] = None) -> int:
         output_dir=args.output_dir,
         wan_entry=args.wan_entry,
         speaker_wav=args.speaker_wav,
+        speaker_id=args.speaker_id,
         language=args.language,
         fps=args.fps,
         use_gpu=args.use_gpu,
@@ -254,4 +263,3 @@ def cli_main(argv: Optional[List[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(cli_main())
-
