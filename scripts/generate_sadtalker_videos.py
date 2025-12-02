@@ -158,7 +158,7 @@ def generate_sadtalker_video(
     return sadtalker_video
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: Optional[List[str]] = None) -> tuple[argparse.Namespace, List[str]]:
     parser = argparse.ArgumentParser(
         description="Generate a talking-head video using SadTalker + XTTS audio."
     )
@@ -244,11 +244,11 @@ def parse_args() -> argparse.Namespace:
         default="INFO",
         help="Logging level (DEBUG, INFO, WARNING, ERROR).",
     )
-    return parser.parse_args()
+    return parser.parse_known_args(argv)
 
 
-def cli_main() -> int:
-    args = parse_args()
+def cli_main(argv: Optional[List[str]] = None) -> int:
+    args, passthrough = parse_args(argv)
     logging.basicConfig(
         level=getattr(logging, args.log_level.upper(), logging.INFO),
         format="%(asctime)s %(levelname)s %(message)s",
@@ -275,7 +275,7 @@ def cli_main() -> int:
         enhancer=args.enhancer,
         use_gpu=args.use_gpu,
         keep_intermediate=args.keep_intermediate,
-        extra_sadtalker_args=args.sadtalker_extra,
+        extra_sadtalker_args=((args.sadtalker_extra or []) + passthrough) or None,
         output_name=args.output_name,
     )
 
