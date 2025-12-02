@@ -90,8 +90,9 @@ def synthesize_speech(
             selected_speaker = available_speakers[0]
         else:
             logging.warning(
-                "XTTS did not expose any speaker IDs; relying on TTS defaults."
+                "XTTS did not expose any speaker IDs; falling back to 'speaker_0'."
             )
+            selected_speaker = "speaker_0"
     else:
         if selected_speaker and available_speakers and selected_speaker not in available_speakers:
             logging.warning(
