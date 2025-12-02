@@ -52,7 +52,7 @@ def run_sadtalker(
     follows the common interface from the official Hugging Face release:
         python inference.py --source_image ... --driven_audio ... --result_path ...
     """
-    output_dir = Path(output_dir)
+    output_dir = Path(output_dir).expanduser().resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     result_path = output_dir / output_name
 
@@ -73,7 +73,7 @@ def run_sadtalker(
         "--driven_audio",
         str(audio_path),
         "--result_dir",
-        str(result_path.parent),
+        str(output_dir),
     ]
     if preprocess:
         cmd.extend(["--preprocess", preprocess])
@@ -118,7 +118,7 @@ def generate_sadtalker_video(
     extra_sadtalker_args: Optional[List[str]] = None,
     output_name: str = "final_sadtalker_video.mp4",
 ) -> Path:
-    output_dir = Path(output_dir)
+    output_dir = Path(output_dir).expanduser().resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
     generated_audio = False
