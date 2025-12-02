@@ -106,6 +106,7 @@ def generate_sadtalker_video(
     text_prompt: str,
     output_dir: Path,
     sadtalker_entry: Path,
+    audio_path: Optional[Path] = None,
     speaker_wav: Optional[Path] = None,
     speaker_id: Optional[str] = "en_female_5",
     language: str = "en",
@@ -120,16 +121,22 @@ def generate_sadtalker_video(
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    audio_path = output_dir / "speech.wav"
-
-    synthesize_speech(
-        text=text_prompt,
-        output_path=audio_path,
-        speaker_wav=speaker_wav,
-        speaker_id=speaker_id,
-        language=language,
-        use_gpu=use_gpu,
-    )
+    generated_audio = False
+    if audio_path:
+        audio_path = Path(audio_path)
+        if not audio_path.exists():
+            raise FileNotFoundError(f"Provided audio file not found: {audio_path}")
+    else:
+        audio_path = output_dir / "speech.wav"
+        synthesize_speech(
+            text=text_prompt,
+            output_path=audio_path,
+            speaker_wav=speaker_wav,
+            speaker_id=speaker_id,
+            language=language,
+            use_gpu=use_gpu,
+        )
+        generated_audio = True
 
     sadtalker_video = run_sadtalker(
         source_image=image_path,
@@ -144,7 +151,7 @@ def generate_sadtalker_video(
         extra_args=extra_sadtalker_args,
     )
 
-    if not keep_intermediate and audio_path.exists():
+    if generated_audio and not keep_intermediate and audio_path.exists():
         audio_path.unlink()
 
     logging.info("SadTalker video saved to %s", sadtalker_video)
@@ -172,6 +179,12 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         required=True,
         help="Path to SadTalker inference.py (or equivalent CLI script).",
+    )
+    parser.add_argument(
+        "--audio-path",
+        type=Path,
+        default=None,
+        help="Optional pre-generated audio file to drive SadTalker instead of XTTS.",
     )
     parser.add_argument(
         "--speaker-wav",
@@ -253,6 +266,7 @@ def cli_main() -> int:
         text_prompt=text_prompt,
         output_dir=args.output_dir,
         sadtalker_entry=args.sadtalker_entry,
+        audio_path=args.audio_path,
         speaker_wav=args.speaker_wav,
         speaker_id=args.speaker_id,
         language=args.language,
