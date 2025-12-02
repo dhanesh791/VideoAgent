@@ -72,10 +72,8 @@ def run_sadtalker(
         str(source_image),
         "--driven_audio",
         str(audio_path),
-        "--result_path",
-        str(result_path),
-        "--device",
-        device,
+        "--result_dir",
+        str(result_path.parent),
     ]
     if preprocess:
         cmd.extend(["--preprocess", preprocess])
@@ -83,6 +81,8 @@ def run_sadtalker(
         cmd.append("--still")
     if enhancer:
         cmd.extend(["--enhancer", enhancer])
+    if device == "cpu":
+        cmd.append("--cpu")
     if extra_args:
         cmd.extend(extra_args)
 
