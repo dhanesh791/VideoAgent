@@ -205,6 +205,7 @@ def generate_talking_video(
     image_path: Path,
     text_prompt: str,
     output_dir: Path,
+    audio_path: Optional[Path] = None,
     speaker_wav: Optional[Path] = None,
     speaker_id: Optional[str] = "en_female_5",
     language: str = "en",
@@ -223,14 +224,22 @@ def generate_talking_video(
     silent_video_path = output_dir / "liveportrait_silent.mp4"
     final_video_path = output_dir / output_name
 
-    synthesize_speech(
-        text=text_prompt,
-        output_path=audio_path,
-        speaker_wav=speaker_wav,
-        speaker_id=speaker_id,
-        language=language,
-        use_gpu=use_gpu,
-    )
+    generated_audio = False
+    if audio_path:
+        audio_path = Path(audio_path)
+        if not audio_path.exists():
+            raise FileNotFoundError(f"Provided audio file not found: {audio_path}")
+    else:
+        audio_path = output_dir / "speech.wav"
+        synthesize_speech(
+            text=text_prompt,
+            output_path=audio_path,
+            speaker_wav=speaker_wav,
+            speaker_id=speaker_id,
+            language=language,
+            use_gpu=use_gpu,
+        )
+        generated_audio = True
     run_liveportrait(
         source_image=image_path,
         audio_path=audio_path,
@@ -243,7 +252,9 @@ def generate_talking_video(
     merge_audio_video(silent_video_path, audio_path, final_video_path)
 
     if not keep_intermediate:
-        for temp_file in (audio_path, silent_video_path):
+        for temp_file in ((audio_path if generated_audio else None), silent_video_path):
+            if temp_file is None:
+                continue
             try:
                 temp_file.unlink()
             except FileNotFoundError:
@@ -268,6 +279,12 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
         help="Optional text file containing the script. Overrides --text-prompt if provided.",
     )
     parser.add_argument("--output-dir", type=Path, default=Path("outputs"), help="Directory for outputs.")
+    parser.add_argument(
+        "--audio-path",
+        type=Path,
+        default=None,
+        help="Optional pre-generated audio file (WAV/MP3). Skips XTTS when provided.",
+    )
     parser.add_argument(
         "--speaker-wav",
         type=Path,
@@ -338,6 +355,7 @@ def cli_main(argv: Optional[List[str]] = None) -> int:
         image_path=args.image_path,
         text_prompt=text_prompt,
         output_dir=args.output_dir,
+        audio_path=args.audio_path,
         speaker_wav=args.speaker_wav,
         speaker_id=args.speaker_id,
         language=args.language,
