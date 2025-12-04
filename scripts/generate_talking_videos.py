@@ -220,12 +220,11 @@ def generate_talking_video(
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    audio_path = output_dir / "speech.wav"
     silent_video_path = output_dir / "liveportrait_silent.mp4"
     final_video_path = output_dir / output_name
 
     generated_audio = False
-    if audio_path:
+    if audio_path is not None:
         audio_path = Path(audio_path)
         if not audio_path.exists():
             raise FileNotFoundError(f"Provided audio file not found: {audio_path}")
