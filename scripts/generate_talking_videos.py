@@ -124,12 +124,17 @@ def run_liveportrait(
     """
     Animate the reference image with LivePortrait using the supplied audio.
 
-    The function expects LivePortrait's inference entrypoint. By default it will
-    look for ./LivePortrait/inference.py. Override with --liveportrait-entry
-    if the repo lives elsewhere or exposes a different script.
+    This wraps KlingTeam/LivePortrait's inference.py, whose CLI expects:
+        --source  <path>   (portrait image or video)
+        --driving <path>   (driving video / template; we pass audio here)
+        --output_dir <dir> (directory where mp4s are written)
+
+    We let LivePortrait name the file and then pick the newest mp4 in the
+    output directory, returning its path.
     """
     output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_root = output_path.parent
+    output_root.mkdir(parents=True, exist_ok=True)
 
     entry = Path(liveportrait_entry) if liveportrait_entry else Path("LivePortrait") / "inference.py"
     if entry.is_dir():
@@ -143,26 +148,25 @@ def run_liveportrait(
     cmd = [
         sys.executable,
         str(entry),
-        "--source_image",
+        "--source",
         str(source_image),
-        "--driving_audio",
+        "--driving",
         str(audio_path),
-        "--result_video",
-        str(output_path),
-        "--fps",
-        str(fps),
-        "--device",
-        device,
+        "--output_dir",
+        str(output_root),
     ]
     if extra_args:
         cmd.extend(extra_args)
 
     _run_cmd(cmd, cwd=entry.parent)
-    if not output_path.exists():
-        raise RuntimeError("LivePortrait did not produce the silent video.")
 
-    logging.info("LivePortrait silent video saved to %s", output_path)
-    return output_path
+    candidates = sorted(output_root.rglob("*.mp4"))
+    if not candidates:
+        raise RuntimeError("LivePortrait did not produce any mp4 output.")
+
+    chosen = candidates[-1]
+    logging.info("LivePortrait video saved to %s", chosen)
+    return chosen
 
 
 def merge_audio_video(
